@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <title>Dora-Reco（ドラレコ）- 授業用メディア記録アプリ</title>
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic&family=VT323&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      /* 基本フォントをBIZ UDゴシックに設定 */
+      font-family: 'BIZ UDGothic', sans-serif; 
+      margin: 0; 
+      padding: 20px; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container { 
+      background-color: #fff; 
+      padding: 25px; 
+      border-radius: 12px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+      max-width: 700px; 
+      margin: auto;
+    }
+    h1 { 
+      text-align: center; 
+      margin-bottom: 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: bold;
+    }
+    
+    /* サブタイトル用のフォント設定 */
+    .subtitle-en {
+      font-family: 'VT323', monospace;
+      font-size: 24px; /* VT323は少し小さめに見えるため調整 */
+      color: #555;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    
+    .mode-tabs {
+      display: flex;
+      margin-bottom: 25px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+    .mode-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: 'BIZ UDGothic', sans-serif;
+      font-size: 16px;
+      font-weight: bold;
+      color: #666;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .mode-tab.active {
+      color: #667eea;
+    }
+    .mode-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .mode-tab:hover:not(.active) {
+      color: #333;
+      background-color: #f5f5f5;
+    }
+    
+    .mode-content {
+      display: none;
+    }
+    .mode-content.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .media-container { 
+      position: relative; 
+      background-color: #000; 
+      margin-bottom: 20px; 
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    video, audio { 
+      width: 100%; 
+      display: block; 
+    }
+    #audioVisualizer {
+      width: 100%;
+      height: 150px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    #drawingCanvas {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0; 
+      border-radius: 8px; 
+      box-sizing: border-box;
+      font-family: 'BIZ UDGothic', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .drawing-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .drawing-controls label {
+      font-weight: bold;
+    }
+    .drawing-controls input[type="color"] {
+      width: 40px;
+      height: 40px;
+      border: none;
+      padding: 0;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .input-group { 
+      margin-bottom: 20px; 
+    }
+    .input-group label { 
+      display: block; 
+      margin-bottom: 8px; 
+      font-weight: bold; 
+      color: #333;
+    }
+    .input-group input[type="text"],
+    .input-group select { 
+      width: 100%; 
+      padding: 12px; 
+      border: 2px solid #e0e0e0; 
+      border-radius: 8px; 
+      box-sizing: border-box;
+      font-family: 'BIZ UDGothic', sans-serif;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+    
+    /* ボタン配置をセンタリングに戻すためのクラスを復元 */
+    .button-group { 
+      text-align: center; 
+      margin-top: 25px; 
+    }
+
+    button { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white; 
+      border: none; 
+      padding: 12px 30px;
+      font-family: 'BIZ UDGothic', sans-serif;
+      font-size: 16px; 
+      font-weight: bold;
+      margin: 0 8px; 
+      cursor: pointer; 
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    #status { 
+      margin-top: 20px; 
+      padding: 15px; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 8px; 
+      text-align: center;
+      font-weight: bold;
+      min-height: 20px;
+      color: #333;
+    }
+    .common-inputs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .common-inputs .input-group {
+      flex: 1;
+      min-width: 80px;
+      margin-bottom: 0px;
+    }
+    .common-inputs .name-group {
+      flex: 2;
+      min-width: 150px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🎙️ Dora-Reco 🎥（ドラレコ）：記録アプリ</h1>
+
+    <div style="text-align: center; margin-top: -25px; margin-bottom: 30px; line-height: 1.6;">
+      <p class="subtitle-en">
+        Connect the Dots, Drive your Milestones.
+      </p>
+      <div style="display: inline-block; width: 40px; height: 2px; background: linear-gradient(90deg, #667eea, #764ba2); margin: 8px 0;"></div>
+      <p style="color: #777; font-size: 12px; margin: 0; font-weight: 400;">
+        バラバラの気づきを繋いで、<strong style="color: #667eea;">ドライブ</strong>(加速)する。
+        <br>
+        授業の「今」を、<strong style="color: #764ba2;">ドライブ</strong>(保管庫)へ。
+      </p>
+    </div>
+
+    <div class="common-inputs">
+      <div class="input-group">
+        <label>学年</label>
+        <select id="mainGrade"></select>
+      </div>
+      <div class="input-group">
+        <label>クラス</label>
+        <select id="mainClass"></select>
+      </div>
+      <div class="input-group">
+        <label>番号</label>
+        <select id="mainNumber"></select>
+      </div>
+      <div class="input-group name-group">
+        <label>名前</label>
+        <input type="text" id="mainName" placeholder="名前を入力">
+      </div>
+    </div>
+    
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchMode('audio')">🎙️音声</button>
+      <button class="mode-tab" onclick="switchMode('video')">🎥動画</button>
+      <button class="mode-tab" onclick="switchMode('photo')">📷写真</button>
+      <button class="mode-tab" onclick="switchMode('drawing')">✏️お絵かき</button>
+      <button class="mode-tab" onclick="switchMode('text')">📝テキスト</button>
+    </div>
+    
+    <div id="audioMode" class="mode-content active">
+      <canvas id="audioVisualizer"></canvas>
+      <audio id="audioPlayback" controls style="width: 100%; margin-bottom: 15px; display: none;"></audio>
+      <div class="button-group">
+        <button id="audioRecordButton" onclick="startAudioRecording()">🎙️ 録音開始</button>
+        <button id="audioStopButton" class="stop-btn" onclick="stopAudioRecording()" disabled>⏹️ 停止</button>
+        <button id="audioSaveButton" class="save-btn" onclick="saveAudioRecording()" disabled>💾 MP3で保存</button>
+      </div>
+    </div>
+    
+    <div id="videoMode" class="mode-content">
+      <div class="media-container">
+        <video id="previewVideo" autoplay muted playsinline style="display: block;"></video>
+        <video id="videoPlayback" controls style="display: none;"></video>
+      </div>
+      <div class="input-group" id="cameraSelectorContainer" style="display:none;">
+        <label for="cameraSelect">カメラ:</label>
+        <select id="cameraSelect" onchange="switchVideoCamera()"></select>
+      </div>
+      <div class="input-group">
+        <label for="qualitySelect">画質:</label>
+        <select id="qualitySelect" onchange="switchVideoCamera()">
+          <option value="low">低画質 (480p)</option>
+          <option value="medium" selected>中画質 (720p / 推奨)</option>
+          <option value="high">高画質 (1080p)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="formatSelect">ファイル形式:</label>
+        <select id="formatSelect">
+          <option value="mp4">MP4 (推奨)</option>
+          <option value="webm">WebM</option>
+        </select>
+        <div class="info-text" id="formatInfo"></div>
+      </div>
+      <div class="button-group">
+        <button id="videoRecordButton" onclick="startVideoRecording()">🎥 録画開始</button>
+        <button id="videoStopButton" class="stop-btn" onclick="stopVideoRecording()" disabled>⏹️ 停止</button>
+        <button id="videoSaveButton" class="save-btn" onclick="saveVideoRecording()" disabled>💾 保存</button>
+      </div>
+    </div>
+<div id="photoMode" class="mode-content">
+      <div class="media-container">
+        <video id="photoPreview" autoplay muted playsinline></video>
+        <canvas id="photoCanvas" style="display: none;"></canvas>
+        <img id="capturedPhoto" style="display: none; width: 100%; border-radius: 8px;" />
+      </div>
+      <div class="input-group" id="photoCameraSelectorContainer" style="display:none;">
+        <label for="photoCameraSelect">カメラ:</label>
+        <select id="photoCameraSelect" onchange="initPhotoPreview()"></select>
+      </div>
+      <div class="input-group">
+        <label for="photoQualitySelect">画質:</label>
+        <select id="photoQualitySelect" onchange="initPhotoPreview()">
+          <option value="low">低 (480p)</option>
+          <option value="medium" selected>中 (720p)</option>
+          <option value="high">高 (1080p)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="photoFormatSelect">保存形式:</label>
+        <select id="photoFormatSelect">
+          <option value="jpg">JPG (軽量)</option>
+          <option value="png">PNG (高品質)</option>
+        </select>
+      </div>
+      <div class="button-group">
+        <button id="photoCaptureButton" onclick="capturePhoto()">📷 写真を撮る</button>
+        <button id="photoRetakeButton" onclick="retakePhoto()" style="display: none;">🔄 撮り直し</button>
+        <button id="photoSaveButton" class="save-btn" onclick="savePhoto()" disabled>💾 保存</button>
+      </div>
+    </div>
+
+    <div id="drawingMode" class="mode-content">
+      <div class="drawing-controls">
+        <label>色: <input type="color" id="penColor" value="#000000"></label>
+        <label>太さ: <input type="range" id="penWidth" min="1" max="30" value="5"></label>
+        <button onclick="clearCanvas()">全消去</button>
+      </div>
+      <div class="media-container" style="background:none;">
+        <canvas id="drawingCanvas"></canvas>
+      </div>
+      <div class="button-group">
+        <button id="drawingSaveButton" class="save-btn" onclick="saveDrawing()" disabled>💾 保存</button>
+      </div>
+    </div>
+
+    <div id="textMode" class="mode-content">
+      <div class="input-group">
+        <textarea id="textContent" rows="10" placeholder="ここに記録を入力してください..."></textarea>
+      </div>
+      <div class="button-group">
+        <button id="textSaveButton" class="save-btn" onclick="saveText()" disabled>💾 テキスト保存</button>
+      </div>
+    </div>
+    
+    <div id="status">設定を読み込んでいます...</div>
+  </div>
+
+  <script>
+    // ==========================================
+// ★ 1. ここにGASで発行したURLを貼り付けてください ★
+// ==========================================
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxuYRA82MB75FouexXkqr-dYUyzWtVZoLZDfnYgdNmmW26h1wfqDFuOVzkC89iAQOg/exec';
+
+// ==========================================
+// ★ 2. 外部通信用ラッパー（これを入れるだけで魔法のように動きます） ★
+// ==========================================
+const google = {
+  script: {
+    run: (function() {
+      let _successHandler = null;
+      let _failureHandler = null;
+
+      const runFunc = (funcName, args) => {
+        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('ここにURL')) {
+          alert('エラー: GAS_WEB_APP_URL が設定されていません。コード内のURLを書き換えてください。');
+          return;
+        }
+
+        fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify({ function: funcName, args: args })
+        })
+        .then(response => response.json())
+        .then(data => { if (_successHandler) _successHandler(data); })
+        .catch(err => {
+          console.error('通信エラー:', err);
+          if (_failureHandler) _failureHandler(err);
+        });
+      };
+
+      return {
+        withSuccessHandler: function(handler) { _successHandler = handler; return this; },
+        withFailureHandler: function(handler) { _failureHandler = handler; return this; },
+        saveAudioFile: function() { runFunc('saveAudioFile', Array.from(arguments)); },
+        saveVideoFile: function() { runFunc('saveVideoFile', Array.from(arguments)); },
+        savePhotoFile: function() { runFunc('savePhotoFile', Array.from(arguments)); },
+        saveDrawingFile: function() { runFunc('saveDrawingFile', Array.from(arguments)); },
+        saveTextFile: function() { runFunc('saveTextFile', Array.from(arguments)); },
+        getAppSettings: function() { runFunc('getAppSettings', Array.from(arguments)); }
+      };
+    })()
+  }
+};
+// ==========================================
+    // グローバル変数は元の定義をすべて維持
+    let currentMode = 'audio';
+    let audioContext, analyser, audioStream, audioMediaRecorder, audioChunks = [], audioBlob;
+    let videoStream, videoMediaRecorder, videoChunks = [], videoBlob, actualVideoMimeType;
+    let photoStream, photoDataUrl;
+    let drawingCanvas, drawingCtx, isDrawing = false, lastX, lastY;
+
+    // 定数・プリセットも元コードのまま
+    const QUALITY_PRESETS = {
+      low: { width: 640, height: 480, videoBitsPerSecond: 500000 },
+      medium: { width: 1280, height: 720, videoBitsPerSecond: 2000000 },
+      high: { width: 1920, height: 1080, videoBitsPerSecond: 4500000 }
+    };
+    const PHOTO_QUALITY_PRESETS = {
+      low: { width: 640, height: 480 },
+      medium: { width: 1280, height: 720 },
+      high: { width: 1920, height: 1080 }
+    };
+
+    function generateBaseFileName(prefix) {
+      const grade = document.getElementById('mainGrade').value;
+      const klass = document.getElementById('mainClass').value;
+      const num = document.getElementById('mainNumber').value.padStart(2, '0');
+      const name = (document.getElementById('mainName').value.trim() || "未入力").replace(/[\s\\/:\*\?"<>\|]/g, '_');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      return `${grade}${klass}${num}_${name}_${prefix}-${timestamp}`;
+    }
+
+    function clearNameInput() {
+      document.getElementById('mainName').value = '';
+    }
+
+    function switchMode(mode) {
+      if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+      if (videoStream) videoStream.getTracks().forEach(track => track.stop());
+      if (photoStream) photoStream.getTracks().forEach(track => track.stop());
+      
+      document.querySelectorAll('.mode-tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.mode-content').forEach(content => content.classList.remove('active'));
+      
+      const tabMap = { audio: 0, video: 1, photo: 2, drawing: 3, text: 4 };
+      document.querySelectorAll('.mode-tab')[tabMap[mode]].classList.add('active');
+      document.getElementById(`${mode}Mode`).classList.add('active');
+      
+      currentMode = mode;
+      if (mode === 'audio') setupAudioVisualizer();
+      else if (mode === 'video') setupCameraSelector();
+      else if (mode === 'photo') setupPhotoCameraSelector();
+      else if (mode === 'drawing') initDrawingCanvas();
+      else if (mode === 'text') initTextMode();
+    }
+
+    async function setupAudioVisualizer() {
+      const canvas = document.getElementById('audioVisualizer');
+      const ctx = canvas.getContext('2d');
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+      ctx.fillStyle = '#14141e';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    async function startAudioRecording() {
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioMediaRecorder = new MediaRecorder(audioStream);
+        audioChunks = [];
+        audioMediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+        audioMediaRecorder.onstop = async () => {
+          audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const playback = document.getElementById('audioPlayback');
+          playback.src = audioUrl;
+          playback.style.display = 'block';
+          document.getElementById('audioSaveButton').disabled = false;
+          document.getElementById('status').classList.remove('recording');
+        };
+        audioMediaRecorder.start();
+        document.getElementById('audioRecordButton').disabled = true;
+        document.getElementById('audioStopButton').disabled = false;
+        document.getElementById('audioSaveButton').disabled = true;
+        document.getElementById('status').textContent = '録音中...';
+        document.getElementById('status').classList.add('recording');
+        visualizeAudio();
+      } catch (err) {
+        document.getElementById('status').textContent = 'マイクの使用が許可されていないか、エラーが発生しました。';
+      }
+    }
+
+    function visualizeAudio() {
+      const canvas = document.getElementById('audioVisualizer');
+      const ctx = canvas.getContext('2d');
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioContext.createMediaStreamSource(audioStream);
+      analyser = audioContext.createAnalyser();
+      source.connect(analyser);
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      function draw() {
+        if (!isRecording()) return;
+        requestAnimationFrame(draw);
+        analyser.getByteFrequencyData(dataArray);
+        ctx.fillStyle = 'rgba(20, 20, 30, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const barWidth = (canvas.width / bufferLength) * 2.5;
+        let x = 0;
+        for (let i = 0; i < bufferLength; i++) {
+          const barHeight = dataArray[i] / 2;
+          ctx.fillStyle = `rgb(102, 126, 234)`;
+          ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+          x += barWidth + 1;
+        }
+      }
+      function isRecording() { return audioMediaRecorder && audioMediaRecorder.state === 'recording'; }
+      draw();
+    }
+
+    function stopAudioRecording() {
+      audioMediaRecorder.stop();
+      audioStream.getTracks().forEach(track => track.stop());
+      document.getElementById('audioRecordButton').disabled = false;
+      document.getElementById('audioStopButton').disabled = true;
+      document.getElementById('status').textContent = '録音完了。保存してください。';
+    }
+
+    async function saveAudioRecording() {
+      document.getElementById('status').textContent = 'MP3に変換中...';
+      document.getElementById('audioSaveButton').disabled = true;
+      const mp3Blob = await encodeToMp3(audioBlob);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const baseFileName = generateBaseFileName("audio");
+        google.script.run
+          .withSuccessHandler(res => {
+            document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
+            if(res.success) {
+               clearNameInput();
+               document.getElementById('audioPlayback').style.display = 'none';
+            }
+          })
+          .saveAudioFile(reader.result, baseFileName);
+      };
+      reader.readAsDataURL(mp3Blob);
+    }
+
+    async function encodeToMp3(webmBlob) {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const arrayBuffer = await webmBlob.arrayBuffer();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const mp3encoder = new lamejs.Mp3Encoder(audioBuffer.numberOfChannels, audioBuffer.sampleRate, 128);
+      const samples = new Int16Array(audioBuffer.getChannelData(0).length);
+      const channelData = audioBuffer.getChannelData(0);
+      for (let i = 0; i < channelData.length; i++) {
+        samples[i] = channelData[i] * 32767;
+      }
+      const mp3Data = [];
+      const sampleBlockSize = 1152;
+      for (let i = 0; i < samples.length; i += sampleBlockSize) {
+        const sampleChunk = samples.subarray(i, i + sampleBlockSize);
+        const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+        if (mp3buf.length > 0) mp3Data.push(mp3buf);
+      }
+      const mp3buf = mp3encoder.flush();
+      if (mp3buf.length > 0) mp3Data.push(mp3buf);
+      return new Blob(mp3Data, { type: 'audio/mpeg' });
+    }
+
+    async function setupCameraSelector() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const select = document.getElementById('cameraSelect');
+      select.innerHTML = '';
+      videoDevices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Camera ${index + 1}`;
+        select.appendChild(option);
+      });
+      document.getElementById('cameraSelectorContainer').style.display = videoDevices.length > 1 ? 'block' : 'none';
+      initVideoPreview();
+    }
+
+    async function initVideoPreview() {
+      if (videoStream) videoStream.getTracks().forEach(track => track.stop());
+      const quality = document.getElementById('qualitySelect').value;
+      const preset = QUALITY_PRESETS[quality];
+      const constraints = {
+        video: { deviceId: document.getElementById('cameraSelect').value ? { exact: document.getElementById('cameraSelect').value } : undefined,
+                 width: { ideal: preset.width }, height: { ideal: preset.height } },
+        audio: true
+      };
+      try {
+        videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('previewVideo').srcObject = videoStream;
+        document.getElementById('previewVideo').style.display = 'block';
+        document.getElementById('videoPlayback').style.display = 'none';
+      } catch (err) {
+        document.getElementById('status').textContent = 'カメラまたはマイクの起動に失敗しました。';
+      }
+    }
+
+    function switchVideoCamera() { initVideoPreview(); }
+
+    function startVideoRecording() {
+      const format = document.getElementById('formatSelect').value;
+      const quality = document.getElementById('qualitySelect').value;
+      const preset = QUALITY_PRESETS[quality];
+      actualVideoMimeType = format === 'mp4' ? 'video/mp4' : 'video/webm';
+      if (!MediaRecorder.isTypeSupported(actualVideoMimeType)) {
+        actualVideoMimeType = 'video/webm';
+      }
+      videoMediaRecorder = new MediaRecorder(videoStream, {
+        mimeType: actualVideoMimeType,
+        videoBitsPerSecond: preset.videoBitsPerSecond
+      });
+      videoChunks = [];
+      videoMediaRecorder.ondataavailable = e => { if (e.data.size > 0) videoChunks.push(e.data); };
+      videoMediaRecorder.onstop = () => {
+        videoBlob = new Blob(videoChunks, { type: actualVideoMimeType });
+        const videoUrl = URL.createObjectURL(videoBlob);
+        const playback = document.getElementById('videoPlayback');
+        playback.src = videoUrl;
+        playback.style.display = 'block';
+        document.getElementById('previewVideo').style.display = 'none';
+        document.getElementById('videoSaveButton').disabled = false;
+        document.getElementById('status').classList.remove('recording');
+      };
+      videoMediaRecorder.start();
+      document.getElementById('videoRecordButton').disabled = true;
+      document.getElementById('videoStopButton').disabled = false;
+      document.getElementById('videoSaveButton').disabled = true;
+      document.getElementById('status').textContent = '録画中...';
+      document.getElementById('status').classList.add('recording');
+    }
+
+    function stopVideoRecording() {
+      videoMediaRecorder.stop();
+      document.getElementById('videoRecordButton').disabled = false;
+      document.getElementById('videoStopButton').disabled = true;
+      document.getElementById('status').textContent = '録画完了。保存してください。';
+    }
+
+    function saveVideoRecording() {
+      document.getElementById('status').textContent = 'ビデオ保存中...';
+      document.getElementById('videoSaveButton').disabled = true;
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const extension = document.getElementById('formatSelect').value;
+        const baseFileName = generateBaseFileName("video");
+        google.script.run
+          .withSuccessHandler(res => {
+            document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
+            if(res.success) {
+               clearNameInput();
+               initVideoPreview();
+            }
+          })
+          .saveVideoFile(reader.result, baseFileName, extension, actualVideoMimeType);
+      };
+      reader.readAsDataURL(videoBlob);
+    }
+
+    async function setupPhotoCameraSelector() {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = devices.filter(device => device.kind === 'videoinput');
+      const select = document.getElementById('photoCameraSelect');
+      select.innerHTML = '';
+      videoDevices.forEach((device, index) => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Camera ${index + 1}`;
+        select.appendChild(option);
+      });
+      document.getElementById('photoCameraSelectorContainer').style.display = videoDevices.length > 1 ? 'block' : 'none';
+      initPhotoPreview();
+    }
+
+    async function initPhotoPreview() {
+      if (photoStream) photoStream.getTracks().forEach(track => track.stop());
+      const quality = document.getElementById('photoQualitySelect').value;
+      const preset = PHOTO_QUALITY_PRESETS[quality];
+      const constraints = {
+        video: { deviceId: document.getElementById('photoCameraSelect').value ? { exact: document.getElementById('photoCameraSelect').value } : undefined,
+                 width: { ideal: preset.width }, height: { ideal: preset.height } }
+      };
+      try {
+        photoStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('photoPreview').srcObject = photoStream;
+        document.getElementById('photoPreview').style.display = 'block';
+        document.getElementById('capturedPhoto').style.display = 'none';
+      } catch (err) {
+        document.getElementById('status').textContent = 'カメラの起動に失敗しました。';
+      }
+    }
+
+    function capturePhoto() {
+      const video = document.getElementById('photoPreview');
+      const canvas = document.getElementById('photoCanvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0);
+      const format = document.getElementById('photoFormatSelect').value;
+      photoDataUrl = canvas.toDataURL(`image/${format === 'jpg' ? 'jpeg' : 'png'}`);
+      document.getElementById('capturedPhoto').src = photoDataUrl;
+      document.getElementById('capturedPhoto').style.display = 'block';
+      document.getElementById('photoPreview').style.display = 'none';
+      document.getElementById('photoCaptureButton').style.display = 'none';
+      document.getElementById('photoRetakeButton').style.display = 'inline-block';
+      document.getElementById('photoSaveButton').disabled = false;
+    }
+
+    function retakePhoto() {
+      document.getElementById('photoPreview').style.display = 'block';
+      document.getElementById('capturedPhoto').style.display = 'none';
+      document.getElementById('photoCaptureButton').style.display = 'inline-block';
+      document.getElementById('photoRetakeButton').style.display = 'none';
+      document.getElementById('photoSaveButton').disabled = true;
+    }
+
+    function savePhoto() {
+      document.getElementById('status').textContent = 'ドライブに保存中...';
+      document.getElementById('photoSaveButton').disabled = true;
+      const extension = document.getElementById('photoFormatSelect').value;
+      const baseFileName = generateBaseFileName("photo");
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
+          if(res.success) {
+            clearNameInput();
+            retakePhoto();
+          }
+          document.getElementById('photoSaveButton').disabled = !res.success;
+        })
+        .savePhotoFile(photoDataUrl, baseFileName, extension);
+    }
+
+    function initDrawingCanvas() {
+      drawingCanvas = document.getElementById('drawingCanvas');
+      drawingCtx = drawingCanvas.getContext('2d');
+      const container = drawingCanvas.parentElement;
+      drawingCanvas.width = container.offsetWidth;
+      drawingCanvas.height = 350;
+      clearCanvas();
+      
+      function getEventPosition(e) {
+        const rect = drawingCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      }
+
+      function startDrawing(e) {
+        e.preventDefault();
+        isDrawing = true;
+        const pos = getEventPosition(e);
+        [lastX, lastY] = [pos.x, pos.y];
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getEventPosition(e);
+        drawingCtx.beginPath();
+        drawingCtx.moveTo(lastX, lastY);
+        drawingCtx.lineTo(pos.x, pos.y);
+        drawingCtx.strokeStyle = document.getElementById('penColor').value;
+        drawingCtx.lineWidth = document.getElementById('penWidth').value;
+        drawingCtx.lineCap = 'round';
+        drawingCtx.lineJoin = 'round';
+        drawingCtx.stroke();
+        [lastX, lastY] = [pos.x, pos.y];
+        document.getElementById('drawingSaveButton').disabled = false;
+      }
+
+      function stopDrawing() { isDrawing = false; }
+
+      drawingCanvas.onmousedown = startDrawing;
+      drawingCanvas.onmousemove = draw;
+      window.onmouseup = stopDrawing;
+      drawingCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+      drawingCanvas.addEventListener('touchmove', draw, { passive: false });
+      drawingCanvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function clearCanvas() {
+      drawingCtx.fillStyle = '#FFFFFF';
+      drawingCtx.fillRect(0, 0, drawingCanvas.width, drawingCanvas.height);
+      document.getElementById('drawingSaveButton').disabled = true;
+    }
+
+    function saveDrawing() {
+      document.getElementById('status').textContent = 'ドライブに保存中...';
+      document.getElementById('drawingSaveButton').disabled = true;
+      const baseFileName = generateBaseFileName("drawing");
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
+          if(res.success) {
+            clearNameInput();
+            clearCanvas();
+          }
+        })
+        .saveDrawingFile(drawingCanvas.toDataURL('image/png'), baseFileName);
+    }
+
+    function initTextMode() {
+      const textarea = document.getElementById('textContent');
+      const saveButton = document.getElementById('textSaveButton');
+      textarea.addEventListener('input', () => {
+        saveButton.disabled = textarea.value.trim() === '';
+      });
+    }
+
+    function saveText() {
+      const textContent = document.getElementById('textContent').value;
+      if (textContent.trim() === '') return;
+      document.getElementById('status').textContent = 'ドライブに保存中...';
+      document.getElementById('textSaveButton').disabled = true;
+      const baseFileName = generateBaseFileName("text");
+      google.script.run
+        .withSuccessHandler(res => {
+          document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
+          if(res.success) {
+            clearNameInput();
+            document.getElementById('textContent').value = '';
+          }
+        })
+        .saveTextFile(textContent, baseFileName);
+    }
+
+    window.addEventListener('load', () => {
+      google.script.run
+        .withSuccessHandler(settings => {
+          const gSel = document.getElementById('mainGrade');
+          const cSel = document.getElementById('mainClass');
+          const nSel = document.getElementById('mainNumber');
+          settings.gList.forEach(g => gSel.add(new Option(g, g)));
+          settings.cList.forEach(c => cSel.add(new Option(c, c)));
+          for(let i=1; i<=settings.maxNum; i++) nSel.add(new Option(i, i));
+
+          const tabs = document.querySelectorAll('.mode-tab');
+          tabs[0].style.display = settings.audio ? 'flex' : 'none';
+          tabs[1].style.display = settings.video ? 'flex' : 'none';
+          tabs[2].style.display = settings.photo ? 'flex' : 'none';
+          tabs[3].style.display = settings.drawing ? 'flex' : 'none';
+          tabs[4].style.display = settings.text ? 'flex' : 'none';
+
+          const firstMode = ['audio', 'video', 'photo', 'drawing', 'text'].find(m => settings[m]);
+          if (firstMode) {
+            document.getElementById('status').textContent = '準備完了';
+            switchMode(firstMode);
+          } else {
+            document.getElementById('status').textContent = '利用可能なモードがありません。';
+          }
+        })
+        .withFailureHandler(err => {
+          document.getElementById('status').textContent = `エラー: ${err.message}`;
+        })
+        .getAppSettings();
+    });
+  </script>
+</body>
+</html>
