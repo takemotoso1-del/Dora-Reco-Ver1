@@ -369,46 +369,57 @@
 const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxxuYRA82MB75FouexXkqr-dYUyzWtVZoLZDfnYgdNmmW26h1wfqDFuOVzkC89iAQOg/exec';
 
 // ==========================================
-// ★ 2. 外部通信用ラッパー（これを入れるだけで魔法のように動きます） ★
+// ★ 2. 外部通信用ラッパー（改良版） ★
 // ==========================================
 const google = {
   script: {
-    run: (function() {
-      let _successHandler = null;
-      let _failureHandler = null;
-
-      const runFunc = (funcName, args) => {
-        if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('ここにURL')) {
-          alert('エラー: GAS_WEB_APP_URL が設定されていません。コード内のURLを書き換えてください。');
-          return;
-        }
-
-        fetch(GAS_WEB_APP_URL, {
-          method: 'POST',
-          body: JSON.stringify({ function: funcName, args: args })
-        })
-        .then(response => response.json())
-        .then(data => { if (_successHandler) _successHandler(data); })
-        .catch(err => {
-          console.error('通信エラー:', err);
-          if (_failureHandler) _failureHandler(err);
-        });
-      };
-
+    get run() {
       return {
-        withSuccessHandler: function(handler) { _successHandler = handler; return this; },
-        withFailureHandler: function(handler) { _failureHandler = handler; return this; },
-        saveAudioFile: function() { runFunc('saveAudioFile', Array.from(arguments)); },
-        saveVideoFile: function() { runFunc('saveVideoFile', Array.from(arguments)); },
-        savePhotoFile: function() { runFunc('savePhotoFile', Array.from(arguments)); },
-        saveDrawingFile: function() { runFunc('saveDrawingFile', Array.from(arguments)); },
-        saveTextFile: function() { runFunc('saveTextFile', Array.from(arguments)); },
-        getAppSettings: function() { runFunc('getAppSettings', Array.from(arguments)); }
+        _successHandler: null,
+        _failureHandler: null,
+        withSuccessHandler: function(handler) {
+          this._successHandler = handler;
+          return this;
+        },
+        withFailureHandler: function(handler) {
+          this._failureHandler = handler;
+          return this;
+        },
+        _execute: function(funcName, args) {
+          if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('ここにURL')) {
+            alert('エラー: GAS_WEB_APP_URL が設定されていません。コード内のURLを書き換えてください。');
+            return;
+          }
+          fetch(GAS_WEB_APP_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' }, // 通信エラーを防ぐための改良
+            body: JSON.stringify({ function: funcName, args: args })
+          })
+          .then(response => response.json())
+          .then(data => {
+             if (data && data.success === false && data.message && data.message.includes('APIエラー')) {
+                 if (this._failureHandler) this._failureHandler(new Error(data.message));
+                 return;
+             }
+             if (this._successHandler) this._successHandler(data);
+          })
+          .catch(err => {
+            console.error('通信エラー:', err);
+            if (this._failureHandler) this._failureHandler(err);
+          });
+        },
+        saveAudioFile: function(...args) { this._execute('saveAudioFile', args); },
+        saveVideoFile: function(...args) { this._execute('saveVideoFile', args); },
+        savePhotoFile: function(...args) { this._execute('savePhotoFile', args); },
+        saveDrawingFile: function(...args) { this._execute('saveDrawingFile', args); },
+        saveTextFile: function(...args) { this._execute('saveTextFile', args); },
+        getAppSettings: function(...args) { this._execute('getAppSettings', args); }
       };
-    })()
+    }
   }
 };
 // ==========================================
+   
     // グローバル変数は元の定義をすべて維持
     let currentMode = 'audio';
     let audioContext, analyser, audioStream, audioMediaRecorder, audioChunks = [], audioBlob;
