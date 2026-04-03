@@ -3,363 +3,438 @@
 <head>
   <base target="_top">
   <title>Dora-Reco（ドラレコ）- 授業用メディア記録アプリ</title>
-  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic&display=swap" rel="stylesheet">
   <style>
-    body { 
-      /* 基本フォントをBIZ UDゴシックに設定 */
-      font-family: 'BIZ UDGothic', sans-serif; 
-      margin: 0; 
-      padding: 20px; 
+    body {
+      font-family: 'BIZ UDGothic', sans-serif;
+      margin: 0;
+      padding: 13px 15px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
+      box-sizing: border-box;
     }
-    .container { 
-      background-color: #fff; 
-      padding: 25px; 
-      border-radius: 12px; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-      max-width: 700px; 
+    .container {
+      background-color: #fff;
+      /* ★白いカードの底の余白を10pxに削減 */
+      padding: 15px 25px 10px;
+      border-radius: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      max-width: 1200px;
+      width: 98%;
       margin: auto;
     }
-    h1 { 
-      text-align: center; 
-      margin-bottom: 30px;
+
+    /* 吹き出しをタイトル（中央）寄りに配置 */
+    .header-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 15px;
+      gap: 20px;
+    }
+    .header-title {
+      flex-shrink: 0;
+    }
+    .header-title h1 {
+      margin: 0;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
       font-weight: bold;
+      font-size: 36px;
     }
-    
-    /* サブタイトル用のフォント設定 */
-    .subtitle-en {
-      font-family: 'VT323', monospace;
-      font-size: 24px; /* VT323は少し小さめに見えるため調整 */
+    .speech-bubble {
+      position: relative;
+      background: #f5f7fa;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 10px 15px;
+      font-size: 13px;
+      font-weight: bold;
       color: #555;
-      font-weight: 400;
-      letter-spacing: 0.05em;
-      margin: 0;
-      text-transform: uppercase;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .bubble-left { border-color: #667eea; }
+    .bubble-left::after {
+      content: ''; position: absolute; top: 50%; right: -12px; margin-top: -8px;
+      border-width: 8px 0 8px 12px; border-style: solid; border-color: transparent transparent transparent #667eea;
+    }
+    .bubble-left::before {
+      content: ''; position: absolute; top: 50%; right: -9px; margin-top: -6px;
+      border-width: 6px 0 6px 10px; border-style: solid; border-color: transparent transparent transparent #f5f7fa; z-index: 1;
+    }
+    .bubble-right { border-color: #764ba2; }
+    .bubble-right::after {
+      content: ''; position: absolute; top: 50%; left: -12px; margin-top: -8px;
+      border-width: 8px 12px 8px 0; border-style: solid; border-color: transparent #764ba2 transparent transparent;
+    }
+    .bubble-right::before {
+      content: ''; position: absolute; top: 50%; left: -9px; margin-top: -6px;
+      border-width: 6px 10px 6px 0; border-style: solid; border-color: transparent #f5f7fa transparent transparent; z-index: 1;
+    }
+
+    .app-layout {
+      display: flex;
+      gap: 25px;
+      align-items: flex-start;
     }
     
-    .mode-tabs {
+    /* 左側：設定パネル */
+    .settings-panel {
+      width: 380px; 
+      flex-shrink: 0;
+      background: #fdfdfd;
+      padding: 15px;
+      border-radius: 8px;
+      border: 2px solid #f0f0f0;
+    }
+
+    .main-panel {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .vertical-inputs .input-row {
       display: flex;
-      margin-bottom: 25px;
-      border-bottom: 2px solid #e0e0e0;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .vertical-inputs .input-group {
+      flex: 1;
+      margin-bottom: 15px;
+    }
+    .vertical-inputs label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #333;
+      font-size: 14px;
+    }
+    .vertical-inputs input[type="text"],
+    .vertical-inputs select {
+      width: 100%;
+      padding: 5px 10px;
+      height: 48px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-family: 'BIZ UDGothic', sans-serif;
+      font-size: 18px;
+      transition: border-color 0.3s ease;
+    }
+
+    .mode-tabs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 5px;
+      border-top: 2px solid #e0e0e0;
+      padding-top: 15px;
     }
     .mode-tab {
-      flex: 1;
-      padding: 12px;
+      padding: 12px 5px;
       text-align: center;
       cursor: pointer;
-      border: none;
-      background: none;
+      border: 2px solid transparent;
+      background: #f5f5f5;
+      border-radius: 8px;
       font-family: 'BIZ UDGothic', sans-serif;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
       color: #666;
       transition: all 0.3s ease;
-      position: relative;
     }
     .mode-tab.active {
       color: #667eea;
-    }
-    .mode-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: #ebf0fe;
+      border-color: #667eea;
     }
     .mode-tab:hover:not(.active) {
       color: #333;
-      background-color: #f5f5f5;
-    }
-    
-    .mode-content {
-      display: none;
-    }
-    .mode-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .media-container { 
-      position: relative; 
-      background-color: #000; 
-      margin-bottom: 20px; 
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    video, audio { 
-      width: 100%; 
-      display: block; 
-    }
-    #audioVisualizer {
-      width: 100%;
-      height: 150px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-    #drawingCanvas {
-      border: 2px solid #e0e0e0;
-      border-radius: 8px;
-      cursor: crosshair;
-      touch-action: none;
-    }
-    textarea {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid #e0e0e0; 
-      border-radius: 8px; 
-      box-sizing: border-box;
-      font-family: 'BIZ UDGothic', sans-serif;
-      font-size: 14px;
-      transition: border-color 0.3s ease;
-      resize: vertical;
-    }
-    textarea:focus {
-      outline: none;
-      border-color: #667eea;
+      background-color: #e0e0e0;
     }
 
-    .drawing-controls {
+    .mode-content { display: none; }
+    .mode-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* メイン作業パネル (純粋な16:9固定) */
+    .media-container {
+      position: relative;
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      width: 100%;
+      aspect-ratio: 16 / 9;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 20px;
+      margin-bottom: 0;
+      margin-left: auto;
+      margin-right: auto;
     }
-    .drawing-controls label {
+    .media-container video, 
+    .media-container img, 
+    #drawingCanvas, 
+    #audioVisualizer {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    #drawingCanvas {
+      background-color: #fff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    textarea#textContent {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-family: 'BIZ UDGothic', sans-serif;
+      font-size: 16px;
+      resize: none;
+      overflow-y: auto;
+      transition: border-color 0.3s ease;
+      display: block;
+    }
+    textarea#textContent:focus { outline: none; border-color: #667eea; }
+
+    /* 全モード共通：メディア下の操作バー */
+    .mode-controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      /* ★メディア画面との隙間を5pxに圧縮 */
+      margin-top: 5px;
+      background: #fdfdfd;
+      /* ★作業バーの上下の厚み（内側余白）を6pxに圧縮 */
+      padding: 6px 15px;
+      border-radius: 8px;
+      border: 2px solid #f0f0f0;
+    }
+    
+    .drawing-controls,
+    .settings-group,
+    .button-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .drawing-controls label, .settings-group label {
       font-weight: bold;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
     .drawing-controls input[type="color"] {
-      width: 40px;
-      height: 40px;
+      width: 35px;
+      height: 35px;
       border: none;
       padding: 0;
       border-radius: 50%;
       cursor: pointer;
     }
 
-    .input-group { 
-      margin-bottom: 20px; 
-    }
-    .input-group label { 
-      display: block; 
-      margin-bottom: 8px; 
-      font-weight: bold; 
-      color: #333;
-    }
-    .input-group input[type="text"],
-    .input-group select { 
-      width: 100%; 
-      padding: 12px; 
-      border: 2px solid #e0e0e0; 
-      border-radius: 8px; 
-      box-sizing: border-box;
-      font-family: 'BIZ UDGothic', sans-serif;
-      font-size: 14px;
-      transition: border-color 0.3s ease;
-    }
-    
-    /* ボタン配置をセンタリングに戻すためのクラスを復元 */
-    .button-group { 
-      text-align: center; 
-      margin-top: 25px; 
-    }
-
-    button { 
+    button {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white; 
-      border: none; 
-      padding: 12px 30px;
+      color: white;
+      border: none;
+      padding: 10px 20px;
       font-family: 'BIZ UDGothic', sans-serif;
-      font-size: 16px; 
+      font-size: 15px;
       font-weight: bold;
-      margin: 0 8px; 
-      cursor: pointer; 
+      cursor: pointer;
       border-radius: 25px;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
-    
-    #status { 
-      margin-top: 20px; 
-      padding: 15px; 
+    button:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    #status {
+      margin-top: 15px;
+      padding: 12px;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 8px; 
+      border-radius: 8px;
       text-align: center;
       font-weight: bold;
+      font-size: 13px;
       min-height: 20px;
       color: #333;
-    }
-    .common-inputs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-    .common-inputs .input-group {
-      flex: 1;
-      min-width: 80px;
-      margin-bottom: 0px;
-    }
-    .common-inputs .name-group {
-      flex: 2;
-      min-width: 150px;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1>🎙️ Dora-Reco 🎥（ドラレコ）：記録アプリ</h1>
-
-    <div style="text-align: center; margin-top: -25px; margin-bottom: 30px; line-height: 1.6;">
-      <p class="subtitle-en">
-        Connect the Dots, Drive your Milestones.
-      </p>
-      <div style="display: inline-block; width: 40px; height: 2px; background: linear-gradient(90deg, #667eea, #764ba2); margin: 8px 0;"></div>
-      <p style="color: #777; font-size: 12px; margin: 0; font-weight: 400;">
+    
+    <div class="header-container">
+      <div class="speech-bubble bubble-left">
         バラバラの気づきを繋いで、<strong style="color: #667eea;">ドライブ</strong>(加速)する。
-        <br>
+      </div>
+      <div class="header-title">
+        <h1>🎙️ Dora-Reco 🎥</h1>
+      </div>
+      <div class="speech-bubble bubble-right">
         授業の「今」を、<strong style="color: #764ba2;">ドライブ</strong>(保管庫)へ。
-      </p>
-    </div>
-
-    <div class="common-inputs">
-      <div class="input-group">
-        <label>学年</label>
-        <select id="mainGrade"></select>
-      </div>
-      <div class="input-group">
-        <label>クラス</label>
-        <select id="mainClass"></select>
-      </div>
-      <div class="input-group">
-        <label>番号</label>
-        <select id="mainNumber"></select>
-      </div>
-      <div class="input-group name-group">
-        <label>名前</label>
-        <input type="text" id="mainName" placeholder="名前を入力">
-      </div>
-    </div>
-    
-    <div class="mode-tabs">
-      <button class="mode-tab active" onclick="switchMode('audio')">🎙️音声</button>
-      <button class="mode-tab" onclick="switchMode('video')">🎥動画</button>
-      <button class="mode-tab" onclick="switchMode('photo')">📷写真</button>
-      <button class="mode-tab" onclick="switchMode('drawing')">✏️お絵かき</button>
-      <button class="mode-tab" onclick="switchMode('text')">📝テキスト</button>
-    </div>
-    
-    <div id="audioMode" class="mode-content active">
-      <canvas id="audioVisualizer"></canvas>
-      <audio id="audioPlayback" controls style="width: 100%; margin-bottom: 15px; display: none;"></audio>
-      <div class="button-group">
-        <button id="audioRecordButton" onclick="startAudioRecording()">🎙️ 録音開始</button>
-        <button id="audioStopButton" class="stop-btn" onclick="stopAudioRecording()" disabled>⏹️ 停止</button>
-        <button id="audioSaveButton" class="save-btn" onclick="saveAudioRecording()" disabled>💾 MP3で保存</button>
-      </div>
-    </div>
-    
-    <div id="videoMode" class="mode-content">
-      <div class="media-container">
-        <video id="previewVideo" autoplay muted playsinline style="display: block;"></video>
-        <video id="videoPlayback" controls style="display: none;"></video>
-      </div>
-      <div class="input-group" id="cameraSelectorContainer" style="display:none;">
-        <label for="cameraSelect">カメラ:</label>
-        <select id="cameraSelect" onchange="switchVideoCamera()"></select>
-      </div>
-      <div class="input-group">
-        <label for="qualitySelect">画質:</label>
-        <select id="qualitySelect" onchange="switchVideoCamera()">
-          <option value="low">低画質 (480p)</option>
-          <option value="medium" selected>中画質 (720p / 推奨)</option>
-          <option value="high">高画質 (1080p)</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="formatSelect">ファイル形式:</label>
-        <select id="formatSelect">
-          <option value="mp4">MP4 (推奨)</option>
-          <option value="webm">WebM</option>
-        </select>
-        <div class="info-text" id="formatInfo"></div>
-      </div>
-      <div class="button-group">
-        <button id="videoRecordButton" onclick="startVideoRecording()">🎥 録画開始</button>
-        <button id="videoStopButton" class="stop-btn" onclick="stopVideoRecording()" disabled>⏹️ 停止</button>
-        <button id="videoSaveButton" class="save-btn" onclick="saveVideoRecording()" disabled>💾 保存</button>
-      </div>
-    </div>
-<div id="photoMode" class="mode-content">
-      <div class="media-container">
-        <video id="photoPreview" autoplay muted playsinline></video>
-        <canvas id="photoCanvas" style="display: none;"></canvas>
-        <img id="capturedPhoto" style="display: none; width: 100%; border-radius: 8px;" />
-      </div>
-      <div class="input-group" id="photoCameraSelectorContainer" style="display:none;">
-        <label for="photoCameraSelect">カメラ:</label>
-        <select id="photoCameraSelect" onchange="initPhotoPreview()"></select>
-      </div>
-      <div class="input-group">
-        <label for="photoQualitySelect">画質:</label>
-        <select id="photoQualitySelect" onchange="initPhotoPreview()">
-          <option value="low">低 (480p)</option>
-          <option value="medium" selected>中 (720p)</option>
-          <option value="high">高 (1080p)</option>
-        </select>
-      </div>
-      <div class="input-group">
-        <label for="photoFormatSelect">保存形式:</label>
-        <select id="photoFormatSelect">
-          <option value="jpg">JPG (軽量)</option>
-          <option value="png">PNG (高品質)</option>
-        </select>
-      </div>
-      <div class="button-group">
-        <button id="photoCaptureButton" onclick="capturePhoto()">📷 写真を撮る</button>
-        <button id="photoRetakeButton" onclick="retakePhoto()" style="display: none;">🔄 撮り直し</button>
-        <button id="photoSaveButton" class="save-btn" onclick="savePhoto()" disabled>💾 保存</button>
       </div>
     </div>
 
-    <div id="drawingMode" class="mode-content">
-      <div class="drawing-controls">
-        <label>色: <input type="color" id="penColor" value="#000000"></label>
-        <label>太さ: <input type="range" id="penWidth" min="1" max="30" value="5"></label>
-        <button onclick="clearCanvas()">全消去</button>
-      </div>
-      <div class="media-container" style="background:none;">
-        <canvas id="drawingCanvas"></canvas>
-      </div>
-      <div class="button-group">
-        <button id="drawingSaveButton" class="save-btn" onclick="saveDrawing()" disabled>💾 保存</button>
-      </div>
-    </div>
+    <div class="app-layout">
+      
+      <div class="settings-panel">
+        <div class="vertical-inputs">
+          <div class="input-row">
+            <div class="input-group" style="margin-bottom: 0;">
+              <label>クラス</label>
+              <select id="mainGrade"></select> 
+            </div>
+            <div class="input-group" style="margin-bottom: 0;">
+              <label>番号</label>
+              <select id="mainNumber"></select>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>名前</label>
+            <input type="text" id="mainName" placeholder="名前を入力">
+          </div>
+        </div>
 
-    <div id="textMode" class="mode-content">
-      <div class="input-group">
-        <textarea id="textContent" rows="10" placeholder="ここに記録を入力してください..."></textarea>
+        <div class="mode-tabs-grid">
+          <button class="mode-tab active" onclick="switchMode('audio')">🎙️音声</button>
+          <button class="mode-tab" onclick="switchMode('video')">🎥動画</button>
+          <button class="mode-tab" onclick="switchMode('photo')">📷写真</button>
+          <button class="mode-tab" onclick="switchMode('drawing')">✏️お絵かき</button>
+          <button class="mode-tab" onclick="switchMode('text')">📝テキスト</button>
+        </div>
+
+        <div id="status">設定を読み込んでいます...</div>
       </div>
-      <div class="button-group">
-        <button id="textSaveButton" class="save-btn" onclick="saveText()" disabled>💾 テキスト保存</button>
+
+      <div class="main-panel">
+        
+        <div id="audioMode" class="mode-content active">
+          <div class="media-container">
+             <canvas id="audioVisualizer"></canvas>
+          </div>
+          <audio id="audioPlayback" controls style="width: 100%; margin-top: 10px; display: none;"></audio>
+          <div class="mode-controls-bar" style="justify-content: center;">
+            <div class="button-group">
+              <button id="audioRecordButton" onclick="startAudioRecording()">🎙️ 録音開始</button>
+              <button id="audioStopButton" class="stop-btn" onclick="stopAudioRecording()" disabled>⏹️ 停止</button>
+              <button id="audioSaveButton" class="save-btn" onclick="saveAudioRecording()" disabled>💾 MP3で保存</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="videoMode" class="mode-content">
+          <div class="media-container">
+            <video id="previewVideo" autoplay muted playsinline style="display: block;"></video>
+            <video id="videoPlayback" controls style="display: none;"></video>
+          </div>
+          <div class="mode-controls-bar">
+            <div class="settings-group">
+              <div id="cameraSelectorContainer" style="display:none;">
+                <label for="cameraSelect">カメラ:<select id="cameraSelect" onchange="switchVideoCamera()"></select></label>
+              </div>
+              <label for="qualitySelect">画質:
+                <select id="qualitySelect" onchange="switchVideoCamera()">
+                  <option value="low">低画質</option>
+                  <option value="medium" selected>中画質(推奨)</option>
+                  <option value="high">高画質</option>
+                </select>
+              </label>
+              <label for="formatSelect">形式:
+                <select id="formatSelect">
+                  <option value="mp4">MP4 (推奨)</option>
+                  <option value="webm">WebM</option>
+                </select>
+              </label>
+            </div>
+            <div class="button-group">
+              <button id="videoRecordButton" onclick="startVideoRecording()">🎥 録画開始</button>
+              <button id="videoStopButton" class="stop-btn" onclick="stopVideoRecording()" disabled>⏹️ 停止</button>
+              <button id="videoSaveButton" class="save-btn" onclick="saveVideoRecording()" disabled>💾 保存</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="photoMode" class="mode-content">
+          <div class="media-container">
+            <video id="photoPreview" autoplay muted playsinline></video>
+            <canvas id="photoCanvas" style="display: none;"></canvas>
+            <img id="capturedPhoto" style="display: none;" />
+          </div>
+          <div class="mode-controls-bar">
+            <div class="settings-group">
+              <div id="photoCameraSelectorContainer" style="display:none;">
+                <label for="photoCameraSelect">カメラ:<select id="photoCameraSelect" onchange="initPhotoPreview()"></select></label>
+              </div>
+              <label for="photoQualitySelect">画質:
+                <select id="photoQualitySelect" onchange="initPhotoPreview()">
+                  <option value="low">低 (480p)</option>
+                  <option value="medium" selected>中 (720p)</option>
+                  <option value="high">高 (1080p)</option>
+                </select>
+              </label>
+              <label for="photoFormatSelect">形式:
+                <select id="photoFormatSelect">
+                  <option value="jpg">JPG (軽量)</option>
+                  <option value="png">PNG (高品質)</option>
+                </select>
+              </label>
+            </div>
+            <div class="button-group">
+              <button id="photoCaptureButton" onclick="capturePhoto()">📷 写真を撮る</button>
+              <button id="photoRetakeButton" onclick="retakePhoto()" style="display: none;">🔄 撮り直し</button>
+              <button id="photoSaveButton" class="save-btn" onclick="savePhoto()" disabled>💾 保存</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="drawingMode" class="mode-content">
+          <div class="media-container" style="background-color: #f0f0f0; border: 2px solid #e0e0e0;">
+            <canvas id="drawingCanvas"></canvas>
+          </div>
+          <div class="mode-controls-bar">
+            <div class="drawing-controls">
+              <label>色: <input type="color" id="penColor" value="#000000"></label>
+              <label>太さ: <input type="range" id="penWidth" min="1" max="30" value="5"></label>
+              <button style="padding: 6px 15px; font-size: 13px;" onclick="clearCanvas()">全消去</button>
+            </div>
+            <div class="button-group">
+              <button id="drawingSaveButton" class="save-btn" onclick="saveDrawing()" disabled>💾 保存</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="textMode" class="mode-content">
+          <textarea id="textContent" placeholder="ここに記録を入力してください..."></textarea>
+          <div class="mode-controls-bar" style="justify-content: center;">
+            <div class="button-group">
+              <button id="textSaveButton" class="save-btn" onclick="saveText()" disabled>💾 テキスト保存</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-    
-    <div id="status">設定を読み込んでいます...</div>
   </div>
 
   <script>
