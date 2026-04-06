@@ -8,15 +8,16 @@
     body {
       font-family: 'BIZ UDGothic', sans-serif;
       margin: 0;
-      padding: 13px 15px;
+      /* ★画面下の青ゾーンの余白をさらに削る (下を5pxに) */
+      padding: 13px 15px 5px 15px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       min-height: 100vh;
       box-sizing: border-box;
     }
     .container {
       background-color: #fff;
-      /* ★白いカードの底の余白を10pxに削減 */
-      padding: 15px 25px 10px;
+      /* ★白いカードの底の余白を限界(5px)まで削減 */
+      padding: 15px 25px 5px;
       border-radius: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
       max-width: 1200px;
@@ -133,8 +134,9 @@
       border-top: 2px solid #e0e0e0;
       padding-top: 15px;
     }
+    /* ★モードタブ：縦幅を大きくしてタップしやすく */
     .mode-tab {
-      padding: 12px 5px;
+      padding: 16px 5px; 
       text-align: center;
       cursor: pointer;
       border: 2px solid transparent;
@@ -206,19 +208,19 @@
     }
     textarea#textContent:focus { outline: none; border-color: #667eea; }
 
-    /* ★全モード共通：メディア下の操作バー（強制1行＆ダイエット仕様） */
+    /* 全モード共通：メディア下の操作バー */
     .mode-controls-bar {
       display: flex;
-      flex-wrap: nowrap; /* ★絶対に改行させない */
+      flex-wrap: nowrap; 
       justify-content: space-between;
       align-items: center;
-      gap: 5px; /* ★パーツ間の隙間を限界まで圧縮 */
+      gap: 5px; 
       margin-top: 5px;
       background: #fdfdfd;
       padding: 6px 15px;
       border-radius: 8px;
       border: 2px solid #f0f0f0;
-      overflow-x: auto; /* ★万が一はみ出た場合は横スクロールで逃がす（レイアウト崩れ防止） */
+      overflow-x: auto; 
     }
     
     .drawing-controls,
@@ -226,8 +228,8 @@
     .button-group {
       display: flex;
       align-items: center;
-      flex-wrap: nowrap; /* ★グループ内も絶対に改行させない */
-      gap: 5px; /* ★グループ内の隙間も圧縮 */
+      flex-wrap: nowrap; 
+      gap: 5px; 
       margin: 0;
     }
 
@@ -237,10 +239,9 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      white-space: nowrap; /* ★ラベルの文字を改行させない */
+      white-space: nowrap; 
     }
 
-    /* ★操作バー内のプルダウンだけをスリム化（左の設定パネルには影響しません） */
     .mode-controls-bar select {
       padding: 4px 8px;
       font-size: 13px;
@@ -251,7 +252,7 @@
     }
 
     .drawing-controls input[type="color"] {
-      width: 30px; /* ★少しだけスリム化 */
+      width: 30px; 
       height: 30px;
       border: none;
       padding: 0;
@@ -259,19 +260,20 @@
       cursor: pointer;
     }
 
+    /* ★右側ボタン：捻出した余白分、縦幅(上下のpadding)を大きく */
     button {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 8px 15px; /* ★ボタンの余白を少しだけ削ってスリムに */
+      padding: 12px 15px; /* 上下を12pxに拡大 */
       font-family: 'BIZ UDGothic', sans-serif;
-      font-size: 14px; /* ★文字サイズをほんの少し縮小 */
+      font-size: 14px; 
       font-weight: bold;
       cursor: pointer;
       border-radius: 25px;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-      white-space: nowrap; /* ★ボタン内の文字を絶対に改行させない */
+      white-space: nowrap; 
     }
     button:disabled {
       background: #ccc;
@@ -279,16 +281,21 @@
       cursor: not-allowed;
     }
 
+    /* ★ステータスカード（準備完了など）：縦に大きく、文字を大きく、上下中央に */
     #status {
       margin-top: 15px;
-      padding: 12px;
+      padding: 0 15px;
       background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
       border-radius: 8px;
       text-align: center;
       font-weight: bold;
-      font-size: 13px;
-      min-height: 20px;
+      font-size: 15px; /* 文字を少し大きく */
+      height: 50px; /* カード自体を縦に大きく */
       color: #333;
+      /* 上下左右の中央揃え */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
@@ -657,7 +664,7 @@ const google = {
         google.script.run
           .withSuccessHandler(res => {
             document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-            if(res.success) {confetti();
+            if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
               clearNameInput();
               document.getElementById('audioPlayback').style.display = 'none';
             }
@@ -787,7 +794,7 @@ const google = {
         google.script.run
           .withSuccessHandler(res => {
             document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-            if(res.success) {confetti();
+            if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
               clearNameInput();
               initVideoPreview();
             }
@@ -871,7 +878,7 @@ const google = {
       google.script.run
         .withSuccessHandler(res => {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-          if(res.success) {confetti();
+          if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
             clearNameInput();
             retakePhoto();
           }
@@ -943,7 +950,7 @@ const google = {
       google.script.run
         .withSuccessHandler(res => {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-          if(res.success) {confetti();
+          if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
              clearNameInput();
              clearCanvas();
           }
@@ -966,7 +973,7 @@ const google = {
       google.script.run
         .withSuccessHandler(res => {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-          if(res.success) {confetti();
+          if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
             clearNameInput();
             document.getElementById('textContent').value = '';
           }
