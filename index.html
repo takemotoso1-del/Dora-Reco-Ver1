@@ -206,20 +206,19 @@
     }
     textarea#textContent:focus { outline: none; border-color: #667eea; }
 
-    /* 全モード共通：メディア下の操作バー */
+    /* ★全モード共通：メディア下の操作バー（強制1行＆ダイエット仕様） */
     .mode-controls-bar {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap; /* ★絶対に改行させない */
       justify-content: space-between;
       align-items: center;
-      gap: 15px;
-      /* ★メディア画面との隙間を5pxに圧縮 */
+      gap: 5px; /* ★パーツ間の隙間を限界まで圧縮 */
       margin-top: 5px;
       background: #fdfdfd;
-      /* ★作業バーの上下の厚み（内側余白）を6pxに圧縮 */
       padding: 6px 15px;
       border-radius: 8px;
       border: 2px solid #f0f0f0;
+      overflow-x: auto; /* ★万が一はみ出た場合は横スクロールで逃がす（レイアウト崩れ防止） */
     }
     
     .drawing-controls,
@@ -227,8 +226,8 @@
     .button-group {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
+      flex-wrap: nowrap; /* ★グループ内も絶対に改行させない */
+      gap: 5px; /* ★グループ内の隙間も圧縮 */
       margin: 0;
     }
 
@@ -238,10 +237,22 @@
       display: flex;
       align-items: center;
       gap: 5px;
+      white-space: nowrap; /* ★ラベルの文字を改行させない */
     }
+
+    /* ★操作バー内のプルダウンだけをスリム化（左の設定パネルには影響しません） */
+    .mode-controls-bar select {
+      padding: 4px 8px;
+      font-size: 13px;
+      max-width: 100px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-family: 'BIZ UDGothic', sans-serif;
+    }
+
     .drawing-controls input[type="color"] {
-      width: 35px;
-      height: 35px;
+      width: 30px; /* ★少しだけスリム化 */
+      height: 30px;
       border: none;
       padding: 0;
       border-radius: 50%;
@@ -252,14 +263,15 @@
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 8px 15px; /* ★ボタンの余白を少しだけ削ってスリムに */
       font-family: 'BIZ UDGothic', sans-serif;
-      font-size: 15px;
+      font-size: 14px; /* ★文字サイズをほんの少し縮小 */
       font-weight: bold;
       cursor: pointer;
       border-radius: 25px;
       transition: all 0.3s ease;
       box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+      white-space: nowrap; /* ★ボタン内の文字を絶対に改行させない */
     }
     button:disabled {
       background: #ccc;
