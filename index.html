@@ -349,9 +349,9 @@
         
         <div id="audioMode" class="mode-content active">
           <div class="media-container">
-             <canvas id="audioVisualizer"></canvas>
+            <canvas id="audioVisualizer"></canvas>
+            <audio id="audioPlayback" controls style="display: none;"></audio>
           </div>
-          <audio id="audioPlayback" controls style="width: 100%; margin-top: 10px; display: none;"></audio>
           <div class="mode-controls-bar" style="justify-content: center;">
             <div class="button-group">
               <button id="audioRecordButton" onclick="startAudioRecording()">🎙️ 録音開始</button>
