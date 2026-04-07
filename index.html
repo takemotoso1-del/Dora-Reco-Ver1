@@ -299,7 +299,7 @@
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -664,10 +664,14 @@ const google = {
         google.script.run
           .withSuccessHandler(res => {
             document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-            if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-              clearNameInput();
-              document.getElementById('audioPlayback').style.display = 'none';
-            }
+            if(res.success) {
+            // 紙吹雪
+            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+            document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
+            setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000); 
+            clearNameInput();
+            document.getElementById('audioPlayback').style.display = 'none';
+          }
           })
           .saveAudioFile(reader.result, baseFileName);
       };
@@ -794,10 +798,14 @@ const google = {
         google.script.run
           .withSuccessHandler(res => {
             document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-            if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-              clearNameInput();
-              initVideoPreview();
-            }
+            if(res.success) {
+            // 花火風（全方位に広がる）
+            confetti({ particleCount: 200, spread: 360, startVelocity: 30, origin: { y: 0.4 } });
+            document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
+            setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000); 
+            clearNameInput();
+            initVideoPreview();
+          }
           })
           .saveVideoFile(reader.result, baseFileName, extension, actualVideoMimeType);
       };
@@ -864,7 +872,6 @@ const google = {
       document.getElementById('photoCaptureButton').style.display = 'inline-block';
       document.getElementById('photoRetakeButton').style.display = 'none';
       document.getElementById('photoSaveButton').disabled = true;
-      document.getElementById('status').textContent = '準備完了';
     }
 
     function savePhoto() {
@@ -878,9 +885,13 @@ const google = {
       google.script.run
         .withSuccessHandler(res => {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-          if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+          if(res.success) {
+            // 星形のエフェクト
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }, shapes: ['star'], colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8'] });
+            document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
+            setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000); 
             clearNameInput();
-            retakePhoto();
+            retakePhoto(); 
           }
         })
         .savePhotoFile(dataUrl, baseFileName, extension);
@@ -950,9 +961,14 @@ const google = {
       google.script.run
         .withSuccessHandler(res => {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-          if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-             clearNameInput();
-             clearCanvas();
+          if(res.success) {
+            // はなまる（💮）の絵文字を舞わせる
+            const hanamaru = confetti.shapeFromText({ text: '💮', scalar: 3 });
+            confetti({ particleCount: 30, spread: 80, origin: { y: 0.6 }, shapes: [hanamaru] });
+            document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
+            setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000);
+            clearNameInput();
+            clearCanvas();
           }
         })
         .saveDrawingFile(drawingCanvas.toDataURL('image/png'), baseFileName);
@@ -973,7 +989,13 @@ const google = {
       google.script.run
         .withSuccessHandler(res => {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
-          if(res.success) {confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+          if(res.success) {
+            // 鉛筆（✏️）とキラキラ（✨）
+            const pencil = confetti.shapeFromText({ text: '✏️', scalar: 3 });
+            const star = confetti.shapeFromText({ text: '✨', scalar: 2 });
+            confetti({ particleCount: 40, spread: 80, origin: { y: 0.6 }, shapes: [pencil, star] });
+            document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
+            setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000); 
             clearNameInput();
             document.getElementById('textContent').value = '';
           }
