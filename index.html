@@ -282,20 +282,18 @@
     }
 
     /* ★ステータスカード（準備完了など）：縦に大きく、文字を大きく、上下中央に */
-    #status {
-      margin-top: 15px;
-      padding: 0 15px;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
-      font-size: 15px; /* 文字を少し大きく */
-      height: 50px; /* カード自体を縦に大きく */
-      color: #333;
-      /* 上下左右の中央揃え */
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    #status {margin-top: 15px; padding: 0 15px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); border-radius: 8px; text-align: center; font-weight: bold; font-size: 15px; /* 文字を少し大きく */ height: 50px; /* カード自体を縦に大きく */ color: #333;  /* 上下左右の中央揃え */ display: flex; align-items: center; justify-content: center;
+    }
+    /* ★音声再生プレイヤーを黒い画面（16:9）の内側に重ねて表示する魔法 */
+    audio#audioPlayback {
+      position: absolute;
+      bottom: 20px;       /* 画面の下から20px浮かせた位置 */
+      left: 50%;          /* 左右の中央に配置 */
+      transform: translateX(-50%);
+      width: 85%;         /* 横幅を画面にきれいに収める */
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5); /* プレイヤーに影をつけて見やすく */
+      border-radius: 30px;
+      z-index: 10;        /* 波形アニメーションより手前に表示 */
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
@@ -800,7 +798,7 @@ const google = {
             document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
             if(res.success) {
             // 花火風（全方位に広がる）
-            confetti({ particleCount: 200, spread: 360, startVelocity: 30, origin: { y: 0.4 } });
+            confetti({ particleCount: 300, spread: 360, startVelocity: 45, origin: { y: 0.5 }, colors: ['#FF1493', '#00FFFF', '#FFD700', '#ffffff'] });
             document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
             setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000); 
             clearNameInput();
@@ -963,8 +961,8 @@ const google = {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
           if(res.success) {
             // はなまる（💮）の絵文字を舞わせる
-            const hanamaru = confetti.shapeFromText({ text: '💮', scalar: 3 });
-            confetti({ particleCount: 30, spread: 80, origin: { y: 0.6 }, shapes: [hanamaru] });
+            const hanamaru = confetti.shapeFromText({ text: '💮', scalar: 6 });
+　　　　　　　confetti({ particleCount: 50, spread: 90, origin: { y: 0.6 }, shapes: [hanamaru] });
             document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
             setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000);
             clearNameInput();
@@ -991,9 +989,9 @@ const google = {
           document.getElementById('status').textContent = res.success ? "学びの軌跡が正しく🎙️DRIVE📹️されました。" : `保存失敗: ${res.message}`;
           if(res.success) {
             // 鉛筆（✏️）とキラキラ（✨）
-            const pencil = confetti.shapeFromText({ text: '✏️', scalar: 3 });
-            const star = confetti.shapeFromText({ text: '✨', scalar: 2 });
-            confetti({ particleCount: 40, spread: 80, origin: { y: 0.6 }, shapes: [pencil, star] });
+            const pencil = confetti.shapeFromText({ text: '✏️', scalar: 5 });
+            const star = confetti.shapeFromText({ text: '✨', scalar: 4 });
+            confetti({ particleCount: 60, spread: 90, origin: { y: 0.6 }, shapes: [pencil, star] });
             document.getElementById('status').textContent = "学びの軌跡が正しく🎙️DRIVE📹️されました。";
             setTimeout(() => { document.getElementById('status').textContent = '準備完了'; }, 3000); 
             clearNameInput();
